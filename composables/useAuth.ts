@@ -1,53 +1,25 @@
-/**
- * Composable for DWS Account authentication utilities
- */
-export const useAuth = () => {
-  const config = useRuntimeConfig()
-  const API_BASE_URL = config.public.backendUrl
-  const AUTH_PATH = config.public.authUrl
 
-  /**
-   * Get allowed redirect URLs from the API
-   */
-  const getAllowedRedirects = async () => {
-    try {
-      const response = await $fetch(`${API_BASE_URL}/apps/auth?version=2`)
-      return response as { allowedRedirects: string[] }
-    } catch (error) {
-      throw new Error('Failed to fetch allowed redirects')
+import { useFetch } from '#app'
+
+export function useAuth() {
+  const API_BASE_URL = useRuntimeConfig().public.backendUrl
+  const AUTH_PATH = useRuntimeConfig().public.authUrl
+  const checkAuth = async (rUrl: string) => {
+    const { status } = await fetch(`${API_BASE_URL}${AUTH_PATH}/app`, {
+      headers: {
+        'Origin': rUrl
+      }
+    })
+    if (status === 200) {
+      return true
     }
-  }
-
-  /**
-   * Validate if a URL is in the allowed redirects list
-   */
-  const validateRedirectUrl = async (url: string): Promise<boolean> => {
-    try {
-      const { allowedRedirects } = await getAllowedRedirects()
-      return allowedRedirects.includes(url)
-    } catch (error) {
+    if (status === 403) {
       return false
     }
+    return false
   }
-
-  /**
-   * Start OAuth flow
-   */
-  const startOAuth = () => {
-    window.location.href = `${API_BASE_URL}${AUTH_PATH}/oauth`
+  const startOAuthFlow = () => {
+    window.location.href = `${API_BASE_URL}${AUTH_PATH}/oauth2`
   }
-
-  /**
-   * Clear authentication data from localStorage
-   */
-  const clearAuthData = () => {
-    localStorage.removeItem('dws-rUrl')
-  }
-
-  return {
-    getAllowedRedirects,
-    validateRedirectUrl,
-    startOAuth,
-    clearAuthData
-  }
+  return { checkAuth, startOAuthFlow }
 }

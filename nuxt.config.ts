@@ -10,8 +10,8 @@ export default defineNuxtConfig({
   ],
   runtimeConfig: {
     public: {
-      backendUrl: process.env.BACKEND_URL || 'https://api.darelisme.my.id',
-      authUrl: process.env.AUTH_URL || '/auth/v2',
+      backendUrl: process.env.BACKEND_URL,
+      authUrl: process.env.AUTH_URL
     }
   },
   vite: {

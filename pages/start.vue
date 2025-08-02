@@ -1,7 +1,7 @@
 <script setup lang="ts">
 const route = useRoute()
 const router = useRouter()
-const { validateRedirectUrl, startOAuth } = useAuth()
+const { checkAuth, startOAuthFlow } = useAuth()
 
 const rUrl = route.query.rUrl as string
 
@@ -15,18 +15,17 @@ onMounted(async () => {
   localStorage.setItem('dws-rUrl', rUrl)
 
   try {
-    // Check if the rUrl is in the allowed redirects list
-    const isValidRedirect = await validateRedirectUrl(rUrl)
-
-    if (!isValidRedirect) {
+    const isAuthenticated = await checkAuth(rUrl)
+    // console.log(isAuthenticated)
+    
+    if (isAuthenticated) {
+      console.log('User is authenticated, URL is allowed')
+      startOAuthFlow()
+    } else {
       await router.push('/error?message=This URL is not authorized to use DWS authentication method.')
-      return
     }
-
-    // Start OAuth flow
-    startOAuth()
   } catch (error) {
-    console.error('Authentication initialization failed:', error)
+    console.error('Authentication check failed:', error)
     await router.push('/error?message=Authentication service is currently unavailable')
   }
 })
@@ -37,8 +36,8 @@ onMounted(async () => {
     <div class="card w-96 bg-base-100 shadow-xl">
       <div class="card-body items-center text-center">
         <div class="loading loading-spinner loading-lg text-primary"></div>
-        <h2 class="card-title">Initializing Authentication</h2>
-        <p>Please wait while we verify your request...</p>
+        <h2 class="card-title">Checking Authentication</h2>
+        <p>Please wait while we verify your access...</p>
       </div>
     </div>
   </div>

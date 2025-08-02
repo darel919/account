@@ -1,7 +1,6 @@
 <script setup lang="ts">
 const route = useRoute()
 const router = useRouter()
-const { clearAuthData } = useAuth()
 
 const callback = route.query.callback as string
 
@@ -26,7 +25,7 @@ onMounted(async () => {
     clientCallbackUrl.searchParams.set('rt', 'null')
 
     // Clean up localStorage
-    clearAuthData()
+    localStorage.removeItem('dws-rUrl')
 
     // Redirect back to the client app
     window.location.href = clientCallbackUrl.toString()

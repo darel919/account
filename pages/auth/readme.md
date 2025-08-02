@@ -1,16 +1,18 @@
-#### DWS-Account Auth Flow:
+#### DWS-Account Auth Flow (Updated):
 
-To get authentication token, client app must do the following:
+The authentication flow with rUrl parameter handling:
 
-1\. Client app opens DWS-Account with rUrl as callback URL. for example: "https://accounts.darelisme.my.id/start?rUrl=https://monobar.darelisme.my.id". rURl should be saved to localStorage of DWS-Account.
+1. Client app opens DWS-Account with rUrl as callback URL: "https://accounts.darelisme.my.id/start?rUrl=https://monobar.darelisme.my.id"
 
-2\. DWS-Account should fetch to backend API to get list of approved URLs. We must check if the rUrl is on a approved list. If yes, continue. If not, we display a DWS-Account error page saying "This URL is not authorized to use DWS authentication method."
+2. DWS-Account saves rUrl to localStorage and checks authentication by calling `/auth/app` endpoint with the rUrl in the Origin header:
+   - If backend returns 200: URL is allowed, proceed with authentication
+   - If backend returns 403: URL is not allowed, show error page
 
-3\. DWS-Account start auth by navigating to API OAuth endpoint. 
+3. The backend determines URL authorization based on the Origin header containing the requesting URL.
 
-4\. API OAuth page will redirect to google authentication. After successful authentication, Google will redirect to API OAuth "/authorize" endpoint.
+4. Authentication callback processing is handled through the `/auth` route, which retrieves the saved rUrl from localStorage and redirects back to the client with the authentication token.
 
-5\. After Google redirection to API OAuth endpoint, we redirect back to DWS-Account with token parameter. After we receive the token from callback param, we construct a auth callback to "(client url)/auth?at=(token)\&rt=null", delete the saved "rUrl" in localStorage. then we navigate back to the client's URL.
+5. After successful authentication, the client receives the callback at "(client url)/auth?at=(token)&rt=null"
 
 To get profile data, client app must fetch to API OAuth "/verify" endpoint.
 
